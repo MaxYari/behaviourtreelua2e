@@ -93,7 +93,7 @@ Some Interrupts can never be started directly by their parent and only start whe
 *Note*: Interrupts are local to their parent, they can not interrupt branches outside of their Composite parent!
 In the image below `AVeryLongTask` can be interrupted by the `Interrupt A`, but not `Interrupt B`. Similarly - `Task C` can only be interrupted by the `Interrupt B`, but not `Interrupt A`.
 
-![Interrupt](imgs/interruptscope.png)
+![Interruptscope](imgs/Interruptscope.png)
 
 
 ## Original BehaviourTree.lua how to use. 
