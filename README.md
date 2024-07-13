@@ -30,22 +30,22 @@ _BehaviourTreeImports = {
                                                        -- Similar to loadCodeHere but accepts (string,scope) where scope is an object in which
                                                        -- scope code will be executed. Please provide loadCodeHere OR loadCodeInScope, no need to supply both.
 }
----------------------------------------------------------------------------------------------------------------------------------------
 
 local BT = require('behaviourtree/behaviour_tree')
 
--- Read the behaviour tree JSON file exported from the editor---------------
-local file = vfs.open("scripts/MaxYari/experiments/OpenMW AI.b3")
-if not file then error("Failed opening behaviour tree file.") end
-local projectJsonTable = json.decode(file:read("*a")) -- Decode it
-file:close() -- And close it
-----------------------------------------------------------------------------
+-- Read the editor project file (b3/json)
+local file = vfs.open("path/to/your/project.b3")
+if not file then error("Failed opening project file.") end
+local projectJsonTable = json.decode(file:read("*a"))
+file:close()
 
--- Initialise behaviour trees ----------------------------------------------
-local state = {foo = "bar"} -- This is an object that your behaviour trees will be able to access, $foo inside a behaviour node property in the editor will refer to a field within this object
+
+-- Initialise behaviour trees
+local state = {foo = "bar"} -- This is an object that your behaviour trees will be able to access. $foo inside a behaviour node property in the editor will refer to a field within this object.
+
 local bTrees = BT.LoadBehavior3Project(projectJsonTable, state)
+
 -- bTrees.MyTree:setDebugLevel(1) -- Set debug level for a specific tree, MyTree is the name of your tree from the editor.
--- Ready to use! -----------------------------------------------------------
 
 ```
 
