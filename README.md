@@ -42,6 +42,7 @@ file:close() -- And close it
 ----------------------------------------------------------------------------
 
 -- Initialise behaviour trees ----------------------------------------------
+local state = {foo = "bar"} -- This is an object that your behaviour trees will be able to access, $foo inside a behaviour node property in the editor will refer to a field within this object
 local bTrees = BT.LoadBehavior3Project(projectJsonTable, state)
 -- bTrees.MyTree:setDebugLevel(1) -- Set debug level for a specific tree, MyTree is the name of your tree from the editor.
 -- Ready to use! -----------------------------------------------------------
