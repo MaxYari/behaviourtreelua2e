@@ -1,6 +1,7 @@
 -- Global interface----------
 -- Not meant to be used the end-user directly, here mostly for the easy of access from another .lua files of this package
 _BehaviourTreeGlobals                 = {}
+_BehaviourTreeImports = _BehaviourTreeImports or {}
 ----------------------------
 
 local _PACKAGE                        = (...):match("^(.+)[%./][^%./]+") or ""
@@ -31,6 +32,15 @@ BehaviourTree.RunTimeOutcomeDecorator = require(_PACKAGE .. '/node_types/run_tim
 BehaviourTree.InterruptDecorator      = require(_PACKAGE .. '/node_types/interrupt_decorator')
 
 BehaviourTree.register                = Registry.register
+
+local STATUSES                        = {
+  NOT_STARTED = 0,
+  RUNNING = 1,
+  FINISHED_SUCCESS = 2,
+  FINISHED_FAIL = 3,
+  FINISHED_ABORT = 4
+}
+BehaviourTree.STATUSES                = STATUSES
 
 
 -- IMPORTANT NOTES TO SELF:
@@ -130,9 +140,6 @@ function BehaviourTree:initialize(config)
   -- A list of active nodes, most often should consist of a single node, unless parallel execution compound nodes are used
   self.activeNodes = {}
 
-  -- Next run will be the first one, so starting logic should be triggered
-  self.firstRun = true
-
   -- Useful info
   self.frameNumber = 0
 
@@ -183,11 +190,11 @@ end
 function BehaviourTree:run()
   self.frameNumber = self.frameNumber + 1
 
-  if self.firstRun then
+  if self.status ~= STATUSES.RUNNING then
+    self.status = STATUSES.RUNNING
     self:start()
     self.childNode:start()
     if self.finished then return end
-    self.firstRun = false
   end
 
   -- check interrupts
@@ -221,14 +228,24 @@ function BehaviourTree:success()
   -- Behaviour tree is essentially an infinite repeater, it will start its child again on next run()
   Node.success(self)
 
-  self.firstRun = true
+  self.status = STATUSES.FINISHED_SUCCESS
 end
 
 function BehaviourTree:fail()
   -- Behaviour tree is essentially an infinite repeater, it will start its child again on next run()
   Node.fail(self)
 
-  self.firstRun = true
+  self.status = STATUSES.FINISHED_FAIL
+end
+
+function BehaviourTree:abort()
+  Node.abort(self)
+
+  if self.childNode and not self.childNode.finished then
+    self.childNode:abort()
+  end
+
+  self.status = STATUSES.FINISHED_ABORT
 end
 
 -- Debugging functions ----------------------------------------
