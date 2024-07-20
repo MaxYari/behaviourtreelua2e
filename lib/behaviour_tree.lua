@@ -1,7 +1,7 @@
 -- Global interface----------
 -- Not meant to be used the end-user directly, here mostly for the easy of access from another .lua files of this package
 _BehaviourTreeGlobals                 = {}
-_BehaviourTreeImports = _BehaviourTreeImports or {}
+_BehaviourTreeImports                 = _BehaviourTreeImports or {}
 ----------------------------
 
 local _PACKAGE                        = (...):match("^(.+)[%./][^%./]+") or ""
@@ -278,9 +278,8 @@ end
 
 -- Json data loading method ------------------------------------
 ----------------------------------------------------------------
-BehaviourTree.LoadBehavior3Project = function(jsonTable, state)
-  local roots = ParseBehavior3Project(jsonTable, state)
-
+BehaviourTree.LoadBehavior3Project = function(jsonTable, state, parsedDataCb)
+  local roots = ParseBehavior3Project(jsonTable, state, parsedDataCb)
   for title, root in pairs(roots) do
     roots[title] = BehaviourTree:new({ root = root, name = title })
     roots[title]:setStateObject(state)

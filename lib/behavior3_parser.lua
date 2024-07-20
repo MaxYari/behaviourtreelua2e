@@ -49,8 +49,8 @@ local function findTree(id, projectData)
     return nil
 end
 
-
-local function parseNode(node, treeData, projectData)
+-- pdCb == Parsed Data Callback. Useful to alter initialisation data for each node.
+local function parseNode(node, treeData, projectData, pdCb)
     if node == nil then
         return error("Passed node argument is nil, this shouldn't happen...")
     end
@@ -58,7 +58,7 @@ local function parseNode(node, treeData, projectData)
     local embededTree = findTree(node.name, projectData)
     if embededTree then
         print("Detected EMBEDED tree " .. embededTree.title .. " switching to that!")
-        return parseNode(embededTree.nodes[embededTree.root], embededTree, projectData)
+        return parseNode(embededTree.nodes[embededTree.root], embededTree, projectData, pdCb)
     end
 
     local initData = {}
@@ -66,12 +66,12 @@ local function parseNode(node, treeData, projectData)
     initData.isStealthy = node.isStealthy
 
     if node.child then
-        initData.childNode = parseNode(treeData.nodes[node.child], treeData, projectData)
+        initData.childNode = parseNode(treeData.nodes[node.child], treeData, projectData, pdCb)
     end
     if node.children then
         initData.childNodes = {}
         for i, childId in pairs(node.children) do
-            local cn = parseNode(treeData.nodes[childId], treeData, projectData)
+            local cn = parseNode(treeData.nodes[childId], treeData, projectData, pdCb)
             if cn == nil then
                 return error("Parsed node is nil, this shouldn't happen... Node id: " ..
                     childId .. " Node json data: " .. tostring(treeData.nodes[childId]))
@@ -81,13 +81,14 @@ local function parseNode(node, treeData, projectData)
     end
 
     local fn = Registry.get(node.name)
-
-    initData._properties = node.properties
+    
     initData.properties = {}
     for field, value in pairs(node.properties) do
         -- Warning! Strings will break since they will be treated as variables!
         initData.properties[field] = ParsePropertyValue(value, initData)
     end
+
+    if pdCb then pdCb(initData, treeData) end
 
     local inst
 
@@ -107,7 +108,7 @@ local function parseNode(node, treeData, projectData)
 end
 
 -- Recursively parse trees into a dictionaries of initialised nodes
-local function ParseBehavior3Project(projectData, _state)
+local function ParseBehavior3Project(projectData, _state, parsedDataCb)
     state = _state
 
     local trees = {}
@@ -123,7 +124,7 @@ local function ParseBehavior3Project(projectData, _state)
             error(treeData.title ..
                 " tree has no root. Ensure that you have atleast a single node conected to the root node in that tree.")
         end
-        trees[treeData.title] = parseNode(treeData.nodes[treeData.root], treeData, projectData)
+        trees[treeData.title] = parseNode(treeData.nodes[treeData.root], treeData, projectData, parsedDataCb)
     end
 
     return trees
