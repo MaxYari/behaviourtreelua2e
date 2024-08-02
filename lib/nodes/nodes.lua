@@ -60,7 +60,11 @@ local function ContinuousStateCondition(config)
     end
 
     config.start = function(task, state)
-        task.started = true
+        if not p.condition() then
+            task:fail()
+        else
+            task.started = true
+        end
     end
 
     config.finish = function(task, state)
